@@ -160,36 +160,31 @@ fi
 # Setting architecture
 if [ "$architecture" == "32" ]; then
   setLibSuffix="32"
+  setHost="i686-pc-linux-gnu"
 
-  # Until figured out, disable ASM when cross-compiling
-  # Enabling 64bit only options
   if [ "$useMeson" == "false" ]
   then
+    setBuild="x86_64-pc-linux-gnu"
     # export CC="gcc -m32"
     # export CXX="g++ -m32"
     export CFLAGS="-m32"
     export CXXFLAGS="-m32"
     export LLVM_CONFIG="/usr/bin/llvm-config32"
     export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
-    setBuild="x86_64-pc-linux-gnu"
-    setHost="i686-pc-linux-gnu"
-  # else
-  #   baseConfigCmd="$baseConfigCmd \
-  #                 -D asm=false"
   fi
 
 else
   setLibSuffix=""
+  setHost="x86_64-pc-linux-gnu"
 
 	# Enabling 64bit only options
   if [ "$useMeson" == "false" ]
   then
+    setBuild="x86_64-pc-linux-gnu"
     export CFLAGS="-m64"
     export CXXFLAGS="-m64"
     export LLVM_CONFIG="/usr/bin/llvm-config"
     export PKG_CONFIG_PATH="/usr/lib/pkgconfig"
-    setBuild="x86_64-pc-linux-gnu"
-    setHost="x86_64-pc-linux-gnu"
     baseConfigCmd="$baseConfigCmd \
                   --enable-lmsensors \
                   --enable-opencl \
@@ -239,18 +234,18 @@ else
   # -D vdpau-libs-path=$setLibdir/vdpau  \
   # -D va-libs-path=$setLibdir/dri \
   execCmd="$baseConfigCmd \
-          $projectdir\
+          $projectdir \
           $builddir \
           --libdir=$setLibdir \
           --sysconfdir=$setSysconfdir \
           -D b_lto=false \
           -D b_ndebug=true \
           -D valgrind=false"
-  # if [ "$architecture" == "32" ]
-  # then
-  #   execCmd="$execCmd \
-  #           --cross-file x86-linux"
-  # fi
+  if [ "$architecture" == "32" ]
+  then
+    execCmd="$execCmd \
+            --cross-file x86-linux-gnu"
+  fi
 fi
 
 # Configuring and Building
