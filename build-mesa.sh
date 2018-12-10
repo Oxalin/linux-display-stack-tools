@@ -130,7 +130,6 @@ else
                 -D llvm=true \
                 -D shared-glapi=true \
                 -D gbm=true \
-                -D texture-float=true \
                 -D gallium-xa=true \
                 -D gallium-nine=true \
                 -D gallium-vdpau=true \
