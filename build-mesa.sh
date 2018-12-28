@@ -14,9 +14,9 @@ architecture="64"
 sync="true"
 configure="true"
 nProc=$(nproc)
-useMeson="false"
+useMeson="true"
 clean="false"
-baseConfigCmd="./configure"
+baseConfigCmd="arch-meson"
 install="false"
 # Folder in which the GL, GLES and EGL files will be installed
 
@@ -51,10 +51,10 @@ do
 		install="true"
 	fi
 
-  if [ "$param" == "meson" ]
+  if [ "$param" == "nomeson" ]
   then
-    useMeson="true"
-    baseConfigCmd="arch-meson"
+    useMeson="false"
+    baseConfigCmd="./configure"
   fi
 done
 
