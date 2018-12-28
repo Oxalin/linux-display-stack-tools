@@ -86,34 +86,46 @@ then
 fi
 
 # Configuring
-# Not used
-#		--disable-intel \
-#		--disable-nouveau"
-#
-# baseConfigCmd="$baseConfigCmd"
+if [ "$useMeson" == "false" ]
+then # Autogen
+  # Options not used
+  #		--disable-intel \
+  #		--disable-nouveau"
+  #
+  baseConfigCmd="$baseConfigCmd"
+else # Meson
+  baseConfigCmd="$baseConfigCmd"
+fi
 
 # Setting architecture
-if [ "$architecture" == "32" ]
-then
-	export CFLAGS="-m32"
-	export CXXFLAGS="-m32"
-	export LLVM_CONFIG="/usr/bin/llvm-config32"
-	export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
-	setBuild="x86_64-pc-linux-gnu"
-	setHost="i686-pc-linux-gnu"
+if [ "$architecture" == "32" ]; then
   setLibSuffix="32"
-#	execPrefixInstallDir="$HOME/dri"
-#	PrefixInstallDir="$HOME/dri"
+  setHost="i686-pc-linux-gnu"
+
+  if [ "$useMeson" == "false" ]
+  then
+    setBuild="x86_64-pc-linux-gnu"
+    # export CC="gcc -m32"
+    # export CXX="g++ -m32"
+    export CFLAGS="-m32"
+    export CXXFLAGS="-m32"
+    export LLVM_CONFIG="/usr/bin/llvm-config32"
+    export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
+  fi
+
 else
-	export CFLAGS="-m64"
-	export CXXFLAGS="-m64"
-	export LLVM_CONFIG="/usr/bin/llvm-config"
-	export PKG_CONFIG_PATH="/usr/lib/pkgconfig"
-	setBuild="x86_64-pc-linux-gnu"
-	setHost="x86_64-pc-linux-gnu"
   setLibSuffix=""
-#	execPrefixInstallDir="$HOME/dri"
-#	PrefixInstallDir="$HOME/dri"
+  setHost="x86_64-pc-linux-gnu"
+
+	# Enabling 64bit only options
+  if [ "$useMeson" == "false" ]
+  then # Autogen
+    setBuild="x86_64-pc-linux-gnu"
+    export CFLAGS="-m64"
+    export CXXFLAGS="-m64"
+    export LLVM_CONFIG="/usr/bin/llvm-config"
+    export PKG_CONFIG_PATH="/usr/lib/pkgconfig"
+  fi
 fi
 
 # Setting architecture independant variables for paths
@@ -128,32 +140,36 @@ then
   cd $builddir
 fi
 
-# Building
-#execConfigCmd="$baseConfigCmd --build=$setBuild --host=$setHost --libdir=$setLibdir --exec-prefix=$execPrefixInstallDir --prefix=$PrefixInstallDir"
+# Autogen and Configuring
 if [ "$useMeson" == "false" ]
-then
-  execConfigCmd="$baseConfigCmd \
+then # Autogen
+  execCmd="$baseConfigCmd \
                 --build=$setBuild \
                 --host=$setHost \
                 --prefix=$setPrefix \
                 --libdir=$setLibdir"
-else
-  execConfigCmd="$baseConfigCmd \
+else # Meson
+  execCmd="$baseConfigCmd \
                 $projectdir\
                 $builddir \
                 --libdir=$setLibdir \
                 -D valgrind=false"
+  if [ "$architecture" == "32" ]
+  then
+    execCmd="$execCmd \
+            --cross-file x86-linux-gnu"
+  fi
 fi
 
-# Configuring and Building
+# Launching Configuration and Build
 if [ "$useMeson" == "false" ]
 then
   if [ "$configure" == "false" ]
   then
     echo "Skipping configuration, building directly."
   else
-    echo $projectdir/$execConfigCmd
-    $projectdir/$execConfigCmd
+    echo $projectdir/$execCmd
+    $projectdir/$execCmd
   fi
   make -j $nProc
 else
@@ -161,8 +177,8 @@ else
   then
     echo "Skipping configuration, building directly."
   else
-    echo $execConfigCmd
-    $execConfigCmd
+    echo $execCmd
+    $execCmd
   fi
   ninja -j $nProc -C "$builddir"
 fi
@@ -171,7 +187,8 @@ make_exitcode=$?
 
 if [ "$make_exitcode" == "0" ]
 then
-	echo "make succeeded"
+	echo "Build succeeded"
+
 	if [ "$install" == "true" ]
 	then
     if [ "$useMeson" == "false" ]
