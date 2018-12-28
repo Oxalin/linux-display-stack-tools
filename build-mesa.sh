@@ -84,15 +84,15 @@ if [ "$sync" == "true" ]; then
 fi
 
 # Configuring
-# Not used
-#		--enable-static \
-#		--with-gl-lib-name=mesa \
-#		--enable-sysfs \
-#		--enable-glx
-#		--enable-gallium-osmesa \
-#
 if [ "$useMeson" == "false" ]
 then
+  # Options not used
+  #		--enable-static \
+  #		--with-gl-lib-name=mesa \
+  #		--enable-sysfs \
+  #		--enable-glx
+  #		--enable-gallium-osmesa \
+  #
   baseConfigCmd="$baseConfigCmd \
                 --enable-gles1 \
                 --enable-gles2 \
@@ -178,7 +178,7 @@ else
 
 	# Enabling 64bit only options
   if [ "$useMeson" == "false" ]
-  then
+  then # Autogen
     setBuild="x86_64-pc-linux-gnu"
     export CFLAGS="-m64"
     export CXXFLAGS="-m64"
@@ -188,7 +188,7 @@ else
                   --enable-lmsensors \
                   --enable-opencl \
                   --enable-opencl-icd"
-  else
+  else # Meson
     baseConfigCmd="$baseConfigCmd \
                   -D lmsensors=true \
                   -D gallium-opencl=icd"
@@ -202,15 +202,14 @@ setLibdir="$setPrefix/lib$setLibSuffix"
 
 builddir="$projectdir/build/$setHost"
 if [ "$useMeson" == "false" ]
-then
+then # Autogen
   mkdir -p $builddir
   cd $builddir
 fi
 
 # Autogen and Configuring
-
 if [ "$useMeson" == "false" ]
-then
+then # Autogen
   # --- List of options not used ---
   #
   execCmd="$baseConfigCmd \
@@ -224,14 +223,14 @@ then
           --with-dri-driverdir=$setLibdir/dri \
           --with-vdpau-libdir=$setLibdir/vdpau  \
           --with-va-libdir=$setLibdir/dri "
-else
-  # --- List of options not used ---
-  #
+else # Meson
+  # --- Options not used ---
   # -D omx-libs-path=$setLibdir/bellagio \
   # -D d3d-drivers-path=$setLibdir/d3d \
   # -D dri-drivers-path=$setLibdir/dri \
   # -D vdpau-libs-path=$setLibdir/vdpau  \
   # -D va-libs-path=$setLibdir/dri \
+  #
   execCmd="$baseConfigCmd \
           $projectdir \
           $builddir \
@@ -247,7 +246,7 @@ else
   fi
 fi
 
-# Configuring and Building
+# Launching Configuration and Build
 if [ "$useMeson" == "false" ]
 then
   if [ "$configure" == "false" ]
@@ -291,6 +290,7 @@ then
     echo "Launching libglvnd build: $DIR/build-libglvnd.sh $@"
     $DIR/build-libglvnd.sh $@
   fi
+
 else
 	echo "make failed and returned exitcode $make_exitcode"
 fi
