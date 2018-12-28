@@ -10,13 +10,13 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 # Setting default values
 architecture="64"
-sync=true
-configure=true
+sync="true"
+configure="true"
 nProc=$(nproc)
-clean=false
-useMeson=false
-install=false
-baseConfigCmd="./configure"
+clean="false"
+useMeson="true"
+install="false"
+baseConfigCmd="arch-meson"
 
 # Overriding variables if arguments passed
 for param in "$@"
@@ -28,7 +28,7 @@ do
 
 	if [ "$param" == "nosync" ]
 	then
-		sync=false
+		sync="false"
 	fi
 
 	if [ "$param" == "slow" ]
@@ -38,23 +38,23 @@ do
 
 	if [ "$param" == "clean" ]
 	then
-		clean=true
+		clean="true"
 	fi
 
   if [ "$param" == "noconfig" ]
   then
-		configure=false
+		configure="false"
 	fi
 
 	if [ "$param" == "install" ]
 	then
-		install=true
+		install="true"
 	fi
 
-  if [ "$param" == "meson" ]
+  if [ "$param" == "nomeson" ]
   then
-    useMeson=true
-    baseConfigCmd="arch-meson"
+    useMeson="false"
+    baseConfigCmd="./configure"
   fi
 done
 
